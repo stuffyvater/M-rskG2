@@ -1,0 +1,21 @@
+{
+  "name": "bss-app",
+  "version": "0.0.0",
+  "homepage": "https://github.com/jhuebner/M-rskG2",
+  "authors": [
+    "Johannes Huebner <jhuebner@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.7",
+    "web3": "~0.16.0",
+    "jquery": "~3.1.0"
+  }
+}
