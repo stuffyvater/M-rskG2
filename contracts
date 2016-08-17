@@ -1,0 +1,17 @@
+Shipment
+
+whitelist: Array<Address>
+admin: Address
+
+- whitelistStakeholder(Address) -> whitelist
+- amendDocument(Address, string)
+
+---
+
+Document
+
+author: Address
+fingerprint: string
+
+- updateDocument(newFingerprint: string): ???
+- verifyDocument(fingerprint: string): bool
