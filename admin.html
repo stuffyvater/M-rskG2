@@ -47,7 +47,7 @@
 
 <div class="container">
     <div class="row padding-bottom-small">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <h3>Stakeholders</h3>
 
             <form class="form">
@@ -61,11 +61,11 @@
 
 
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <h3>Events</h3>
             <ul class="events"></ul>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 hidden">
             <h3>Own accounts</h3>
             <ul class="accounts"></ul>
         </div>
@@ -78,57 +78,9 @@
         var ethNode = 'http://localhost:8545';
         var adminAccount = '0x59345b530e950ce79a09ca0043195930006f0a1e';
         var adminPassword = 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik';
-        var contractAddress = '0x16071690e976426253E8738e9b0DE6003e21149f';
+        var contractAddress = '0x18061eEBc759612E6145B243Be84a44237663c8E';
 
-        var abiArray = [{
-            "constant": false,
-            "inputs": [{"name": "stakeholder", "type": "address"}],
-            "name": "whitelistStakeholder",
-            "outputs": [],
-            "type": "function"
-        }, {
-            "constant": true,
-            "inputs": [{"name": "", "type": "address"}],
-            "name": "whiteList",
-            "outputs": [{"name": "", "type": "bool", "value": false}],
-            "type": "function"
-        }, {
-            "constant": false,
-            "inputs": [{"name": "documentId", "type": "uint256"}, {"name": "newFingerprint", "type": "string"}],
-            "name": "amendDocument",
-            "outputs": [],
-            "type": "function"
-        }, {
-            "constant": true,
-            "inputs": [{"name": "", "type": "uint256"}],
-            "name": "documents",
-            "outputs": [{
-                "name": "author",
-                "type": "address",
-                "value": "0x0000000000000000000000000000000000000000"
-            }, {"name": "fingerprint", "type": "string", "value": ""}],
-            "type": "function"
-        }, {
-            "constant": true,
-            "inputs": [],
-            "name": "admin",
-            "outputs": [{"name": "", "type": "address", "value": "0x59345b530e950ce79a09ca0043195930006f0a1e"}],
-            "type": "function"
-        }, {"inputs": [], "type": "constructor"}, {
-            "anonymous": false,
-            "inputs": [{"indexed": false, "name": "stakeholder", "type": "address"}],
-            "name": "StakeholderWhitelisted",
-            "type": "event"
-        }, {
-            "anonymous": false,
-            "inputs": [{"indexed": false, "name": "documentId", "type": "uint256"}, {
-                "indexed": false,
-                "name": "author",
-                "type": "address"
-            }, {"indexed": false, "name": "newFingerprint", "type": "string"}],
-            "name": "DocumentAmended",
-            "type": "event"
-        }];
+        var abiArray = [ { "constant": false, "inputs": [ { "name": "stakeholder", "type": "address" } ], "name": "whitelistStakeholder", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "whiteList", "outputs": [ { "name": "", "type": "bool", "value": true } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "documentId", "type": "uint256" }, { "name": "newFingerprint", "type": "string" } ], "name": "amendDocument", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "documents", "outputs": [ { "name": "author", "type": "address", "value": "0x0000000000000000000000000000000000000000" }, { "name": "fingerprint", "type": "string", "value": "" } ], "type": "function" }, { "constant": true, "inputs": [], "name": "admin", "outputs": [ { "name": "", "type": "address", "value": "0x59345b530e950ce79a09ca0043195930006f0a1e" } ], "type": "function" }, { "inputs": [], "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "stakeholder", "type": "address" } ], "name": "StakeholderWhitelisted", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "documentId", "type": "uint256" }, { "indexed": false, "name": "author", "type": "address" }, { "indexed": false, "name": "newFingerprint", "type": "string" } ], "name": "DocumentAmended", "type": "event" } ];
 
         if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
@@ -153,13 +105,13 @@
             var addressToBeWhitelisted = $("input[name=address]").val();
             e.preventDefault();
 
-            var unlockingAccountResult = web3.personal.unlockAccount(adminAccount, adminPassword, 300);
+            /*var unlockingAccountResult = web3.personal.unlockAccount(adminAccount, adminPassword, 300);
 
             console.log("Unlocking account... " + unlockingAccountResult );
 
             if(!unlockingAccountResult){
                 alert("Unlocking the account failed.");
-            }
+            }*/
 
             var result = contractInstance.whitelistStakeholder(addressToBeWhitelisted, {from: adminAccount}, function(err, result){
                 if(err){
@@ -182,6 +134,11 @@
              if(entry.event == "StakeholderWhitelisted")
              {
                  args = entry.args.stakeholder;
+             }
+             else if(entry.event == 'DocumentAmended')
+             {
+                 //console.log(entry.args);
+                 args = "documentId: 1234, hash: " + entry.args.newFingerprint;
              }
              $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
          });

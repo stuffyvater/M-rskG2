@@ -55,7 +55,7 @@
             <form class="form">
                 <div class="form-group">
                     <label for="file">File:</label>
-                    <input type="text" class="form-control" name="file" id="file" placeholder="File" />
+                    <input type="file" class="form-control" name="file" id="file" placeholder="File" />
                 </div>
 
                 <div class="form-group">
@@ -75,59 +75,14 @@
     $(document).ready(function(){
 
         var ethNode = 'http://localhost:8545';
-        var ownAccount = '0xb4d1659155e6e1ee09c80f81b8da980d535dedb7';
-        var ownPassword = 'Test1234';
-        //var contractAddress = '0x16071690e976426253E8738e9b0DE6003e21149f';
+        var ownAccount = '0x59345b530e950ce79a09ca0043195930006f0a1e'; // 0xb4d1659155e6e1ee09c80f81b8da980d535dedb7';
+        //var ownAccount = '0x0d7d1af6ffc6791e97389df770a583c9753df622';
+        //var ownPassword = 'Cindy2010';
+        var ownPassword = 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik';
+        //var ownPassword = 'Test1234';
+        //var contractAddress = '0x18061eebc759612e6145b243be84a44237663c8e';
 
-        var abiArray = [{
-            "constant": false,
-            "inputs": [{"name": "stakeholder", "type": "address"}],
-            "name": "whitelistStakeholder",
-            "outputs": [],
-            "type": "function"
-        }, {
-            "constant": true,
-            "inputs": [{"name": "", "type": "address"}],
-            "name": "whiteList",
-            "outputs": [{"name": "", "type": "bool", "value": false}],
-            "type": "function"
-        }, {
-            "constant": false,
-            "inputs": [{"name": "documentId", "type": "uint256"}, {"name": "newFingerprint", "type": "string"}],
-            "name": "amendDocument",
-            "outputs": [],
-            "type": "function"
-        }, {
-            "constant": true,
-            "inputs": [{"name": "", "type": "uint256"}],
-            "name": "documents",
-            "outputs": [{
-                "name": "author",
-                "type": "address",
-                "value": "0x0000000000000000000000000000000000000000"
-            }, {"name": "fingerprint", "type": "string", "value": ""}],
-            "type": "function"
-        }, {
-            "constant": true,
-            "inputs": [],
-            "name": "admin",
-            "outputs": [{"name": "", "type": "address", "value": "0x59345b530e950ce79a09ca0043195930006f0a1e"}],
-            "type": "function"
-        }, {"inputs": [], "type": "constructor"}, {
-            "anonymous": false,
-            "inputs": [{"indexed": false, "name": "stakeholder", "type": "address"}],
-            "name": "StakeholderWhitelisted",
-            "type": "event"
-        }, {
-            "anonymous": false,
-            "inputs": [{"indexed": false, "name": "documentId", "type": "uint256"}, {
-                "indexed": false,
-                "name": "author",
-                "type": "address"
-            }, {"indexed": false, "name": "newFingerprint", "type": "string"}],
-            "name": "DocumentAmended",
-            "type": "event"
-        }];
+        var abiArray = [ { "constant": false, "inputs": [ { "name": "stakeholder", "type": "address" } ], "name": "whitelistStakeholder", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "whiteList", "outputs": [ { "name": "", "type": "bool", "value": true } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "documentId", "type": "uint256" }, { "name": "newFingerprint", "type": "string" } ], "name": "amendDocument", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "documents", "outputs": [ { "name": "author", "type": "address", "value": "0x0000000000000000000000000000000000000000" }, { "name": "fingerprint", "type": "string", "value": "" } ], "type": "function" }, { "constant": true, "inputs": [], "name": "admin", "outputs": [ { "name": "", "type": "address", "value": "0x59345b530e950ce79a09ca0043195930006f0a1e" } ], "type": "function" }, { "inputs": [], "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "stakeholder", "type": "address" } ], "name": "StakeholderWhitelisted", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "documentId", "type": "uint256" }, { "indexed": false, "name": "author", "type": "address" }, { "indexed": false, "name": "newFingerprint", "type": "string" } ], "name": "DocumentAmended", "type": "event" } ];
 
         if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
@@ -139,52 +94,56 @@
         // Populate the own user address
         $("#admin").html(ownAccount);
 
-
-
-
         $('#submitButton').click(function(e){
-            contract = web3.eth.contract(abiArray);
 
-            var contractAddress = $("input[name=contractAddress]").val();
-            console.log(contractAddress);
             e.preventDefault();
-            var unlockingAccountResult = web3.personal.unlockAccount(ownAccount, ownPassword, 300);
-            console.log("Unlocking account... " + unlockingAccountResult );
-            if(!unlockingAccountResult){
-                alert("Unlocking the account failed.");
+            var files = document.getElementById('file').files;
+            if (!files.length) {
+                alert('Please select a file!');
+                return;
             }
 
+            var file = files[0];
+            var reader = new FileReader();
 
-            var contractInstance = contract.at(contractAddress);
-            var file = $("input[name=file]").val();
-            var hash = CryptoJS.SHA256(file).toString();
+            reader.readAsText(file);
+            // If we use onloadend, we need to check the readyState.
+            reader.onloadend = function(evt) {
+                console.log(reader.result);
+                if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+                    var content = evt.target.result;
 
+                    var fingerprint = CryptoJS.SHA256(content).toString();
+                    console.log("file fingerprint: " + fingerprint);
 
-            contractInstance.amendDocument(1234, hash, {from: ownAccount}, function(err, result){
-                if(err){
-                    alert("An error occurred: " + err);
+                    contract = web3.eth.contract(abiArray);
+
+                    var contractAddress = $("input[name=contractAddress]").val();
+                    console.log(contractAddress);
+                    e.preventDefault();
+                    /*var unlockingAccountResult = web3.personal.unlockAccount(ownAccount, ownPassword, 300);
+                    console.log("Unlocking account... " + unlockingAccountResult );
+                    if(!unlockingAccountResult){
+                        alert("Unlocking the account failed.");
+                    }*/
+
+                    var contractInstance = contract.at(contractAddress);
+
+                    contractInstance.amendDocument(1234, fingerprint, {from: ownAccount, gas: 51000}, function(err, result){
+                        if(err){
+                            alert("An error occurred: " + err);
+                        }
+                        else {
+                            if(result)
+                            {
+                                alert("The document has been uploaded (fingerprint: " + fingerprint + ")");
+                            }
+                            console.log(result);
+                        }
+                    });
                 }
-                else {
-                    if(result)
-                    {
-                        alert("The document has been uploaded (fingerprint: " + hash + ")");
-                    }
-                    console.log(result);
-                }
-            });
+            };
         });
-
-       /*  // watch for an event with {some: 'args'}
-         var events = contractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
-         events.watch(function(error, entry){
-             var args = "";
-             if(entry.event == "StakeholderWhitelisted")
-             {
-                 args = entry.args.stakeholder;
-             }
-             $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
-         });
-*/
     });
 
 </script>
