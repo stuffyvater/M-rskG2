@@ -5,13 +5,12 @@
     <title>Title</title>
 
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,600,300,200" media="all">
+    <link rel="stylesheet" type="text/css" href="./style.css" media="all">
     <script type="application/javascript" src="./bower_components/web3/dist/web3.js"></script>
     <script type="application/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
     <script type="application/javascript" src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 </head>
 <body>
-
-
 
 <nav class="navbar navbar-inverse">
     <div class="container">
@@ -29,10 +28,9 @@
                 <li class="active">
                     <a href="#">Crypod</a>
                 </li>
-
             </ul>
             <p class="navbar-text navbar-right">
-                Signed in as Achmed (Logout)
+                Signed in as Achmed (<span id="admin"></span>)
             </p>
         </div>
     </div>
@@ -49,34 +47,38 @@
 
 <div class="container">
     <div class="row padding-bottom-small">
-        <div class="col-md-12">
-
-
-            <h1>Whitelisting a stakeholder</h1>
+        <div class="col-md-4">
+            <h3>Stakeholders</h3>
 
             <form class="form">
-                <label for="address">Whitelist the following address:</label>
-                <input type="text" name="address" id="address" />
-                <button type="submit" id="whitelistButton">Whitelist</button>
+                <div class="form-group">
+                    <label for="address">Whitelist stakeholder:</label>
+                    <input type="text" class="form-control" name="address" id="address" placeholder="Address" />
+                </div>
+
+                <button type="submit" id="whitelistButton" class="btn btn-default">Whitelist</button>
             </form>
 
 
-            <hr />
-
-            <h2>Admin: <span id="admin"></span></h2>
-
-            <hr />
-
-            <ul class="accounts">
-
-            </ul>
-
+        </div>
+        <div class="col-md-4">
+            <h3>Events</h3>
+            <ul class="events"></ul>
+        </div>
+        <div class="col-md-4">
+            <h3>Own accounts</h3>
+            <ul class="accounts"></ul>
         </div>
     </div>
 </div>
 <script type="application/javascript">
 
     $(document).ready(function(){
+
+        var ethNode = 'http://localhost:8545';
+        var adminAccount = '0x59345b530e950ce79a09ca0043195930006f0a1e';
+        var adminPassword = 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik';
+        var contractAddress = '0x16071690e976426253E8738e9b0DE6003e21149f';
 
         var abiArray = [{
             "constant": false,
@@ -132,52 +134,69 @@
             web3 = new Web3(web3.currentProvider);
         } else {
             // set the provider you want from Web3.providers
-            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+            web3 = new Web3(new Web3.providers.HttpProvider(ethNode));
         }
 
         var accounts = web3.eth.accounts;
 
         accounts.forEach(function(account){
-            $(".accounts").append("<li>"+account+": " + web3.eth.getBalance(account).toString() + " Ether </li>");
+            $(".accounts").append("<li>"+account+": " + web3.eth.getBalance(account).toNumber() / (10**18) + " Ether </li>");
         });
 
         // Populate the Admin
         contract = web3.eth.contract(abiArray);
-        var contractInstance = contract.at('0x16071690e976426253E8738e9b0DE6003e21149f');
+        var contractInstance = contract.at(contractAddress);
         var admin = contractInstance.admin();
         $("#admin").html(admin);
-
-
-
 
         $('#whitelistButton').click(function(e){
             var addressToBeWhitelisted = $("input[name=address]").val();
             e.preventDefault();
 
-            console.log("Unlocking account... " + web3.personal.unlockAccount('0x59345b530e950ce79a09ca0043195930006f0a1e', 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik', 300));
+            var unlockingAccountResult = web3.personal.unlockAccount(adminAccount, adminPassword, 300);
 
-            var result = contractInstance.whitelistStakeholder(addressToBeWhitelisted, {from: '0x59345b530e950ce79a09ca0043195930006f0a1e'});
+            console.log("Unlocking account... " + unlockingAccountResult );
 
-            console.log(result);
+            if(!unlockingAccountResult){
+                alert("Unlocking the account failed.");
+            }
 
-            alert(result);
-
+            var result = contractInstance.whitelistStakeholder(addressToBeWhitelisted, {from: adminAccount}, function(err, result){
+                if(err){
+                    alert("An error occurred: " + err);
+                }
+                else {
+                    if(result)
+                    {
+                        alert("The address is being whitelisted");
+                    }
+                    console.log(result);
+                }
+            });
         });
 
-
-
-
-        /*  var MyContract = web3.eth.contract(abi);
-         var myContractInstance = MyContract.at('0x78e97bcc5b5dd9ed228fed7a4887c0d7287344a9');
-
          // watch for an event with {some: 'args'}
-         var events = myContractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
-         events.watch(function(error, result){
-         ...
+         var events = contractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
+         events.watch(function(error, entry){
+             var args = "";
+             if(entry.event == "StakeholderWhitelisted")
+             {
+                 args = entry.args.stakeholder;
+             }
+             $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
          });
 
-         // would get all past logs again.
-         events.get(function(error, logs){ ... });*/
+/*         // would get all past logs again.
+         events.get(function(error, logs){
+             logs.forEach(function(entry){
+                 var args = "";
+                 if(entry.event == "StakeholderWhitelisted")
+                 {
+                     args = entry.args.stakeholder;
+                 }
+                 $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
+             });
+         });*/
 
     });
 

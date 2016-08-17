@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,600,300,200" media="all">
+    <link rel="stylesheet" type="text/css" href="./style.css" media="all">
+    <script type="application/javascript" src="./bower_components/web3/dist/web3.js"></script>
+    <script type="application/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="application/javascript" src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <img src="bbs-logo.png" height="27" class="navbar-brand" />
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="#">Crypod</a>
+                </li>
+            </ul>
+            <p class="navbar-text navbar-right">
+                Signed in as Stakeholder (<span id="admin"></span>)
+            </p>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="alert alert-success hidden" role="alert"></div>
+            <div class="alert alert-danger hidden" role="alert"></div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row padding-bottom-small">
+        <div class="col-md-4">
+            <h3>Upload file</h3>
+
+            <form class="form">
+                <div class="form-group">
+                    <label for="address">Whitelist stakeholder:</label>
+                    <input type="text" class="form-control" name="address" id="address" placeholder="Address" />
+                </div>
+
+                <button type="submit" id="whitelistButton" class="btn btn-default">Whitelist</button>
+            </form>
+
+
+        </div>
+    </div>
+</div>
+<script type="application/javascript">
+
+    $(document).ready(function(){
+
+        var ethNode = 'http://localhost:8545';
+        var adminAccount = '0x59345b530e950ce79a09ca0043195930006f0a1e';
+        var adminPassword = 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik';
+        var contractAddress = '0x16071690e976426253E8738e9b0DE6003e21149f';
+
+        var abiArray = [{
+            "constant": false,
+            "inputs": [{"name": "stakeholder", "type": "address"}],
+            "name": "whitelistStakeholder",
+            "outputs": [],
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [{"name": "", "type": "address"}],
+            "name": "whiteList",
+            "outputs": [{"name": "", "type": "bool", "value": false}],
+            "type": "function"
+        }, {
+            "constant": false,
+            "inputs": [{"name": "documentId", "type": "uint256"}, {"name": "newFingerprint", "type": "string"}],
+            "name": "amendDocument",
+            "outputs": [],
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [{"name": "", "type": "uint256"}],
+            "name": "documents",
+            "outputs": [{
+                "name": "author",
+                "type": "address",
+                "value": "0x0000000000000000000000000000000000000000"
+            }, {"name": "fingerprint", "type": "string", "value": ""}],
+            "type": "function"
+        }, {
+            "constant": true,
+            "inputs": [],
+            "name": "admin",
+            "outputs": [{"name": "", "type": "address", "value": "0x59345b530e950ce79a09ca0043195930006f0a1e"}],
+            "type": "function"
+        }, {"inputs": [], "type": "constructor"}, {
+            "anonymous": false,
+            "inputs": [{"indexed": false, "name": "stakeholder", "type": "address"}],
+            "name": "StakeholderWhitelisted",
+            "type": "event"
+        }, {
+            "anonymous": false,
+            "inputs": [{"indexed": false, "name": "documentId", "type": "uint256"}, {
+                "indexed": false,
+                "name": "author",
+                "type": "address"
+            }, {"indexed": false, "name": "newFingerprint", "type": "string"}],
+            "name": "DocumentAmended",
+            "type": "event"
+        }];
+
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            // set the provider you want from Web3.providers
+            web3 = new Web3(new Web3.providers.HttpProvider(ethNode));
+        }
+
+
+        // Populate the Admin
+        contract = web3.eth.contract(abiArray);
+        var contractInstance = contract.at(contractAddress);
+        var admin = contractInstance.admin();
+        $("#admin").html(admin);
+
+        $('#whitelistButton').click(function(e){
+            var addressToBeWhitelisted = $("input[name=address]").val();
+            e.preventDefault();
+
+            var unlockingAccountResult = web3.personal.unlockAccount(adminAccount, adminPassword, 300);
+
+            console.log("Unlocking account... " + unlockingAccountResult );
+
+            if(!unlockingAccountResult){
+                alert("Unlocking the account failed.");
+            }
+
+            var result = contractInstance.whitelistStakeholder(addressToBeWhitelisted, {from: adminAccount}, function(err, result){
+                if(err){
+                    alert("An error occurred: " + err);
+                }
+                else {
+                    if(result)
+                    {
+                        alert("The address is being whitelisted");
+                    }
+                    console.log(result);
+                }
+            });
+        });
+
+         // watch for an event with {some: 'args'}
+         var events = contractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
+         events.watch(function(error, entry){
+             var args = "";
+             if(entry.event == "StakeholderWhitelisted")
+             {
+                 args = entry.args.stakeholder;
+             }
+             $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
+         });
+
+/*         // would get all past logs again.
+         events.get(function(error, logs){
+             logs.forEach(function(entry){
+                 var args = "";
+                 if(entry.event == "StakeholderWhitelisted")
+                 {
+                     args = entry.args.stakeholder;
+                 }
+                 $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
+             });
+         });*/
+
+    });
+
+</script>
+
+<link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.min.css" media="all">
+</body>
+</html>

@@ -1,0 +1,39 @@
+
+body{
+    font-family: 'Source Sans Pro', sans-serif !important;;
+    color: #7b7b7b !important;
+    background-color: #ffffff !important; /* cbcbcb */
+}
+
+#ytplayer{
+    display: block;
+    width: 640px;
+    height: 390px;
+    border: 0;
+}
+
+.padding-bottom-x-small {
+    padding-bottom: 15px;
+}
+.padding-bottom-small {
+    padding-bottom: 25px;
+}
+.padding-bottom {
+    padding-bottom: 50px;
+}
+.padding-bottom-large {
+    padding-bottom: 75px;
+}
+
+.padding-top-x-small {
+    padding-top: 15px;
+}
+.padding-top-small {
+    padding-top: 25px;
+}
+.padding-top {
+    padding-top: 50px;
+}
+.padding-top-large {
+    padding-top: 75px;
+}
