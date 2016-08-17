@@ -9,6 +9,8 @@
     <script type="application/javascript" src="./bower_components/web3/dist/web3.js"></script>
     <script type="application/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
     <script type="application/javascript" src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="./bower_components/crypto-js/crypto-js.js"></script>
+
 </head>
 <body>
 
@@ -52,11 +54,16 @@
 
             <form class="form">
                 <div class="form-group">
-                    <label for="address">Whitelist stakeholder:</label>
-                    <input type="text" class="form-control" name="address" id="address" placeholder="Address" />
+                    <label for="file">File:</label>
+                    <input type="text" class="form-control" name="file" id="file" placeholder="File" />
                 </div>
 
-                <button type="submit" id="whitelistButton" class="btn btn-default">Whitelist</button>
+                <div class="form-group">
+                    <label for="contractAddress">Contract address:</label>
+                    <input type="text" class="form-control" name="contractAddress" id="contractAddress" placeholder="Contract Address" />
+                </div>
+
+                <button type="submit" id="submitButton" class="btn btn-default">Upload</button>
             </form>
 
 
@@ -68,9 +75,9 @@
     $(document).ready(function(){
 
         var ethNode = 'http://localhost:8545';
-        var adminAccount = '0x59345b530e950ce79a09ca0043195930006f0a1e';
-        var adminPassword = 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik';
-        var contractAddress = '0x16071690e976426253E8738e9b0DE6003e21149f';
+        var ownAccount = '0xb4d1659155e6e1ee09c80f81b8da980d535dedb7';
+        var ownPassword = 'Test1234';
+        //var contractAddress = '0x16071690e976426253E8738e9b0DE6003e21149f';
 
         var abiArray = [{
             "constant": false,
@@ -129,40 +136,45 @@
             web3 = new Web3(new Web3.providers.HttpProvider(ethNode));
         }
 
+        // Populate the own user address
+        $("#admin").html(ownAccount);
 
-        // Populate the Admin
-        contract = web3.eth.contract(abiArray);
-        var contractInstance = contract.at(contractAddress);
-        var admin = contractInstance.admin();
-        $("#admin").html(admin);
 
-        $('#whitelistButton').click(function(e){
-            var addressToBeWhitelisted = $("input[name=address]").val();
+
+
+        $('#submitButton').click(function(e){
+            contract = web3.eth.contract(abiArray);
+
+            var contractAddress = $("input[name=contractAddress]").val();
+            console.log(contractAddress);
             e.preventDefault();
-
-            var unlockingAccountResult = web3.personal.unlockAccount(adminAccount, adminPassword, 300);
-
+            var unlockingAccountResult = web3.personal.unlockAccount(ownAccount, ownPassword, 300);
             console.log("Unlocking account... " + unlockingAccountResult );
-
             if(!unlockingAccountResult){
                 alert("Unlocking the account failed.");
             }
 
-            var result = contractInstance.whitelistStakeholder(addressToBeWhitelisted, {from: adminAccount}, function(err, result){
+
+            var contractInstance = contract.at(contractAddress);
+            var file = $("input[name=file]").val();
+            var hash = CryptoJS.SHA256(file).toString();
+
+
+            contractInstance.amendDocument(1234, hash, {from: ownAccount}, function(err, result){
                 if(err){
                     alert("An error occurred: " + err);
                 }
                 else {
                     if(result)
                     {
-                        alert("The address is being whitelisted");
+                        alert("The document has been uploaded (fingerprint: " + hash + ")");
                     }
                     console.log(result);
                 }
             });
         });
 
-         // watch for an event with {some: 'args'}
+       /*  // watch for an event with {some: 'args'}
          var events = contractInstance.allEvents({fromBlock: 0, toBlock: 'latest'});
          events.watch(function(error, entry){
              var args = "";
@@ -172,19 +184,7 @@
              }
              $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
          });
-
-/*         // would get all past logs again.
-         events.get(function(error, logs){
-             logs.forEach(function(entry){
-                 var args = "";
-                 if(entry.event == "StakeholderWhitelisted")
-                 {
-                     args = entry.args.stakeholder;
-                 }
-                 $(".events").append("<li>"+entry.event+" (" + args + ")</li>");
-             });
-         });*/
-
+*/
     });
 
 </script>
