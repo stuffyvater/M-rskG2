@@ -63,6 +63,10 @@
                     <input type="text" class="form-control" name="contractAddress" id="contractAddress" placeholder="Contract Address" />
                 </div>
 
+                <div>
+                  <label id="hashResult"></label>
+                </div>
+
                 <button type="submit" id="submitButton" class="btn btn-default btn-primary btn-large">Upload</button>
             </form>
 
@@ -73,12 +77,12 @@
 <script type="application/javascript">
 
     $(document).ready(function(){
-
+        $("#hashResult").hide();
         var ethNode = 'http://localhost:8545';
-        var ownAccount = '0x59345b530e950ce79a09ca0043195930006f0a1e'; // 0xb4d1659155e6e1ee09c80f81b8da980d535dedb7';
-        //var ownAccount = '0x0d7d1af6ffc6791e97389df770a583c9753df622';
-        //var ownPassword = 'Cindy2010';
-        var ownPassword = 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik';
+        var ownAccount = '...'; // 0xb4d1659155e6e1ee09c80f81b8da980d535dedb7';
+        // var ownAccount = '0x0d7d1af6ffc6791e97389df770a583c9753df622';
+        //var ownPassword = '...';
+        var ownPassword = '...';
         //var ownPassword = 'Test1234';
         //var contractAddress = '0x18061eebc759612e6145b243be84a44237663c8e';
 
@@ -109,39 +113,35 @@
             reader.readAsText(file);
             // If we use onloadend, we need to check the readyState.
             reader.onloadend = function(evt) {
-                console.log(reader.result);
-                if (evt.target.readyState == FileReader.DONE) { // DONE == 2
-                    var content = evt.target.result;
+                var i = IpfsApi("/ip4/127.0.0.1/tcp/5001");
+                i.add(i.Buffer(reader.result), function (err, res){
+                    if(err || !res)
+                      return console.error("ipfs add error", err, res);
 
-                    var fingerprint = CryptoJS.SHA256(content).toString();
-                    console.log("file fingerprint: " + fingerprint);
+                    var storedDoc = res[0];
+                    var fingerprint = storedDoc.hash;
 
+                    $("#hashResult").show();
+                    $("#hashResult").html(fingerprint);
+                    console.log("fingerprint: "+ fingerprint);
                     contract = web3.eth.contract(abiArray);
 
                     var contractAddress = $("input[name=contractAddress]").val();
-                    console.log(contractAddress);
                     e.preventDefault();
-                    /*var unlockingAccountResult = web3.personal.unlockAccount(ownAccount, ownPassword, 300);
-                    console.log("Unlocking account... " + unlockingAccountResult );
-                    if(!unlockingAccountResult){
-                        alert("Unlocking the account failed.");
-                    }*/
-
                     var contractInstance = contract.at(contractAddress);
 
-                    contractInstance.amendDocument(1234, fingerprint, {from: ownAccount, gas: 51000}, function(err, result){
+                    contractInstance.amendDocument(1234, fingerprint, {from: ownAccount, gas: 0}, function(err, result){
                         if(err){
                             alert("An error occurred: " + err);
                         }
                         else {
-                            if(result)
-                            {
-                                alert("The document has been uploaded (fingerprint: " + fingerprint + ")");
+                            if(result){
+                                console.log("The document has been uploaded (fingerprint: " + fingerprint + ")");
                             }
                             console.log(result);
                         }
                     });
-                }
+                });
             };
         });
     });
