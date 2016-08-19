@@ -78,8 +78,8 @@
     $(document).ready(function(){
 
         var ethNode = 'http://localhost:8545';
-        var adminAccount = '0x59345b530e950ce79a09ca0043195930006f0a1e';
-        var adminPassword = 'vDcrEpE3kRqm3Pxf]pvyFfbgXerR7sLyRCbik';
+        var adminAccount = '...';
+        var adminPassword = '...';
         var contractAddress = '0x18061eEBc759612E6145B243Be84a44237663c8E';
 
         var abiArray = [ { "constant": false, "inputs": [ { "name": "stakeholder", "type": "address" } ], "name": "whitelistStakeholder", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "address" } ], "name": "whiteList", "outputs": [ { "name": "", "type": "bool", "value": true } ], "type": "function" }, { "constant": false, "inputs": [ { "name": "documentId", "type": "uint256" }, { "name": "newFingerprint", "type": "string" } ], "name": "amendDocument", "outputs": [], "type": "function" }, { "constant": true, "inputs": [ { "name": "", "type": "uint256" } ], "name": "documents", "outputs": [ { "name": "author", "type": "address", "value": "0x0000000000000000000000000000000000000000" }, { "name": "fingerprint", "type": "string", "value": "" } ], "type": "function" }, { "constant": true, "inputs": [], "name": "admin", "outputs": [ { "name": "", "type": "address", "value": "0x59345b530e950ce79a09ca0043195930006f0a1e" } ], "type": "function" }, { "inputs": [], "type": "constructor" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "stakeholder", "type": "address" } ], "name": "StakeholderWhitelisted", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": false, "name": "documentId", "type": "uint256" }, { "indexed": false, "name": "author", "type": "address" }, { "indexed": false, "name": "newFingerprint", "type": "string" } ], "name": "DocumentAmended", "type": "event" } ];
