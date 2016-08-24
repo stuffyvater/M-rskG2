@@ -130,7 +130,7 @@
                     e.preventDefault();
                     var contractInstance = contract.at(contractAddress);
 
-                    contractInstance.amendDocument(1234, fingerprint, {from: ownAccount, gas: 0}, function(err, result){
+                    contractInstance.amendDocument(1234, fingerprint, {from: ownAccount, gas: 1000000}, function(err, result){
                         if(err){
                             alert("An error occurred: " + err);
                         }
