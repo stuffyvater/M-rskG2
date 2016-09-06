@@ -1,0 +1,97 @@
+<html>
+  <head>
+  </head>
+    <script type="application/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="https://npmcdn.com/ipfs-api/dist/index.js"></script>
+  <body>
+    <h2>Create a Contract!</h2>
+    <button id="create">Create!</button>
+    <div id="yay"></div>
+    <br/>
+    <hr>
+    <h2>Whitelist a Stakeholder</h2>
+    Contract Address: <input type="text" id="contractAddress"/><br/>
+    Stakeholder ID: <input type="text" id="stakeholderId"/>
+    <button id="submit">Go!</button>
+    <div id="yay2"></div>
+    <hr>
+    <h2>Upload/Amend Document</h2>
+    Contract Address: <input type="text" id="contractAddress1"/><br/>
+    File: <input type="file" id="file"/>
+    <button id="submit1">Go!</button>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var abi = [{"constant":false,"inputs":[{"name":"stakeholder","type":"address"}],"name":"whitelistStakeholder","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"whiteList","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"documentId","type":"uint256"},{"name":"newFingerprint","type":"string"}],"name":"amendDocument","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"documents","outputs":[{"name":"author","type":"address"},{"name":"fingerprint","type":"string"}],"type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"stakeholder","type":"address"}],"name":"StakeholderWhitelisted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"documentId","type":"uint256"},{"indexed":false,"name":"author","type":"address"},{"indexed":false,"name":"newFingerprint","type":"string"}],"name":"DocumentAmended","type":"event"}];
+      /* VARIABLES */
+      var MyContract = web3.eth.contract(abi);
+      $('#create').click(function() {
+        var c = MyContract.new({from: web3.eth.coinbase, gas: 300000}, function(e,r) {
+          console.log(e);
+          console.log(r);
+          $('#yay').html("Yay. Hash is: "+r.transactionHash);
+        });
+      })
+
+      $('#submit').click(function() {
+        var contractAddress = $('#contractAddress').val();
+        var stakeholder = $('#stakeholderId').val();
+        var myContractInstance = MyContract.at(contractAddress);
+        console.log(myContractInstance);
+        console.log(contractAddress);
+        myContractInstance.whitelistStakeholder(stakeholder, {from: web3.eth.coinbase, gas: 91000}, function(e,r) {
+          console.log(e);
+          console.log(r);
+          if (!e) {
+            $('#yay2').html('Stakeholder whitelisted');
+          }
+        });
+      });
+
+      $('#submit1').click(function() {
+        var files = document.getElementById('file').files;
+        if (!files.length) {
+            alert('Please select a file!');
+            return;
+        }
+
+        var file = files[0];
+        var reader = new FileReader();
+
+        reader.readAsText(file);
+        // If we use onloadend, we need to check the readyState.
+        reader.onloadend = function(evt) {
+            var i = IpfsApi("/ip4/127.0.0.1/tcp/5001");
+            i.add(i.Buffer(reader.result), function (err, res){
+                if(err || !res)
+                  return console.error("ipfs add error", err, res);
+
+                var storedDoc = res[0];
+                var fingerprint = storedDoc.hash;
+
+                $("#hashResult").show();
+                $("#hashResult").html(fingerprint);
+                console.log("fingerprint: "+ fingerprint);
+                contract = web3.eth.contract(abi);
+
+                var contractAddress = $("#contractAddress1").val();
+                evt.preventDefault();
+                var contractInstance = contract.at(contractAddress);
+
+                contractInstance.amendDocument(1234, fingerprint, {from: web3.eth.coinbase, gas: 1000000}, function(e,r){
+                  if(e){
+                      alert("An error occurred: " + e);
+                  }
+                  else {
+                      if(r){
+                          console.log("The document has been uploaded (fingerprint: " + fingerprint + ")");
+                      }
+                      console.log(r);
+                  }
+                });
+            });
+        };
+      })
+    });
+  </script>
+  </body>
+</html>
