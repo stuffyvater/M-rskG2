@@ -1,0 +1,22 @@
+<html>
+  <head>
+    <script type="application/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
+  </head>
+  <body>
+  <div id="admin"></div>
+  <button id="test">Click to Send</button>
+<script type="application/javascript">
+  $(document).ready(function(){
+    $('#test').click(function() {
+      web3.eth.sendTransaction({to: '0xC3Ec826CFeAe6888C835aEF242d060443Ff3c27D'}, 
+          function(e,r){})
+    });
+    var contractAddress = '0xC3Ec826CFeAe6888C835aEF242d060443Ff3c27D';
+    var web3 = window.web3;
+    var admin = web3.eth.accounts[0];
+    console.log(admin);
+
+    $('#admin').html('User: '+admin);
+</script>
+  </body>
+</html>
