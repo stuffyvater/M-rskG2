@@ -2,8 +2,8 @@
   <head>
   </head>
     <script type="application/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="ipfs.js"></script>
-    <!-- <script src="https://npmcdn.com/ipfs&#45;api/dist/index.js"></script> -->
+    <!-- <script src="ipfs.js"></script> -->
+    <script src="https://npmcdn.com/ipfs-api/dist/index.js"></script>
   <body>
     <h2>Create a Contract!</h2>
     <button id="create">Create!</button>
@@ -22,11 +22,12 @@
     <button id="submit1">Go!</button>
   <script type="text/javascript">
     $(document).ready(function() {
-      var abi = [{"constant":false,"inputs":[{"name":"stakeholder","type":"address"}],"name":"whitelistStakeholder","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"whiteList","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"documentId","type":"uint256"},{"name":"newFingerprint","type":"string"}],"name":"amendDocument","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"documents","outputs":[{"name":"author","type":"address"},{"name":"fingerprint","type":"string"}],"type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"stakeholder","type":"address"}],"name":"StakeholderWhitelisted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"documentId","type":"uint256"},{"indexed":false,"name":"author","type":"address"},{"indexed":false,"name":"newFingerprint","type":"string"}],"name":"DocumentAmended","type":"event"}];
+      var abi = [{"constant":false,"inputs":[{"name":"stakeholder","type":"address"}],"name":"whitelistStakeholder","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"whiteList","outputs":[{"name":"","type":"bool"}],"type":"function"},{"constant":false,"inputs":[{"name":"documentId","type":"uint256"},{"name":"newFingerprint","type":"string"}],"name":"amendDocument","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"documents","outputs":[{"name":"author","type":"address"},{"name":"fingerprint","type":"string"}],"type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"name":"","type":"address"}],"type":"function"},{"inputs":[{"name":"a","type":"address"}],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"stakeholder","type":"address"}],"name":"StakeholderWhitelisted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"documentId","type":"uint256"},{"indexed":false,"name":"author","type":"address"},{"indexed":false,"name":"newFingerprint","type":"string"}],"name":"DocumentAmended","type":"event"}];
+
       /* VARIABLES */
       var MyContract = web3.eth.contract(abi);
       $('#create').click(function() {
-        var c = MyContract.new({from: web3.eth.coinbase, gas: 300000}, function(e,r) {
+        var c = MyContract.new(web3.eth.coinbase, {from: web3.eth.coinbase, gas: 300000}, function(e,r) {
           console.log(e);
           console.log(r);
           $('#yay').html("Yay. Hash is: "+r.transactionHash);

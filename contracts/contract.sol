@@ -11,8 +11,8 @@ contract Shipment
 	event StakeholderWhitelisted(address stakeholder);
 	event DocumentAmended(uint documentId, address author, string newFingerprint);
 	
-	function Shipment(){
-		admin = msg.sender;
+	function Shipment(address a){
+		admin = a;
 	}
 	
 	function whitelistStakeholder(address stakeholder) ifAdmin(msg.sender){
