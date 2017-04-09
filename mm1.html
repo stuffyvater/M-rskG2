@@ -6,6 +6,7 @@
     <script type="application/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
     <script type="application/javascript" src="./bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <body>
+    <b>You are:</b> <span id="whoami"></span>
     <h2>Create a Contract!</h2>
     <button id="create">Create!</button>
     <div id="yay"></div>
@@ -26,6 +27,7 @@
       var ethNode = 'http://localhost:8545';
       var adminAccount = '0x03e4ea7c17cc932a9488f84639b774ac376e6e9e';
       var contractAddress = '0x18061eEBc759612E6145B243Be84a44237663c8E';
+      $('#whoami').html(adminAccount);
       if (typeof web3 !== 'undefined') {
           web3 = new Web3(web3.currentProvider);
       } else {
