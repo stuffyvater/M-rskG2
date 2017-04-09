@@ -10,6 +10,7 @@
     <h2>Create a Contract!</h2>
     <button id="create">Create!</button>
     <div id="yay"></div>
+    <div id="where"></div>
     <br/>
     <hr>
     <h2>Whitelist a Stakeholder</h2>
@@ -50,10 +51,36 @@
                       'Contract is being created. '
                       +'Click <a target="_blank" href="https://ropsten.etherscan.io/tx/'+r.transactionHash+'">here</a> to view the transaction.<br/>'
                       +'Once successfully created you can whitelist stakeholders '
-                      +'and upload documents.');
+                      +'and upload documents.<br/>');
+                  waitBlock(r.transactionHash, function(ca) {
+                    $('#where').html('Contracted created at address: '+ca+'<br/>'
+                                      +'Follow all transactions <a target="_blank" href="https://ropsten.etherscan.io/address/'+ca+'">here</a>.');
+                  });
               }
           })
       });
+
+      // await sleep trick
+      // http://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      // We need to wait until any miner has included the transaction
+      // in a block to get the address of the contract
+      async function waitBlock(hash, callback) {
+        while (true) {
+          let receipt = web3.eth.getTransactionReceipt(hash);
+          if (receipt && receipt.contractAddress) {
+            console.log("Your contract has been deployed at http://ropsten.etherscan.io/address/" + receipt.contractAddress);
+            console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
+            callback(receipt.contractAddress);
+            break;
+          }
+          console.log("Waiting a mined block to include your contract... currently in block " + web3.eth.blockNumber);
+          await sleep(4000);
+        }
+      }
 
       $('#submit').click(function() {
         var contractAddress = $('#contractAddress').val();
