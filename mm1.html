@@ -46,7 +46,11 @@
                   $('#yay').html('<b>Error</b>: '+e.message);
               }
               else {
-                  $('#yay').html('Contract is being created. Click <a target="_blank" href="https://ropsten.etherscan.io/tx/'+r.transactionHash+'">here</a> to view the transaction.');
+                  $('#yay').html(
+                      'Contract is being created. '
+                      +'Click <a target="_blank" href="https://ropsten.etherscan.io/tx/'+r.transactionHash+'">here</a> to view the transaction.<br/>'
+                      +'Once successfully created you can whitelist stakeholders '
+                      +'and upload documents.');
               }
           })
       });
