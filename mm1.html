@@ -11,6 +11,7 @@
     <button id="create">Create!</button>
     <div id="yay"></div>
     <div id="where"></div>
+    <span class="loader"><img src="https://ropsten.etherscan.io/images/ajax-loader2.gif"/></span>
     <br/>
     <hr>
     <h2>Whitelist a Stakeholder</h2>
@@ -18,13 +19,17 @@
     Stakeholder ID: <input type="text" id="stakeholderId"/>
     <button id="submit">Go!</button>
     <div id="yay2"></div>
+    <span class="loader"><img src="https://ropsten.etherscan.io/images/ajax-loader2.gif"/></span>
     <hr>
     <h2>Upload/Amend Document</h2>
     Contract Address: <input type="text" id="contractAddress1"/><br/>
     File: <input type="file" id="file"/>
     <button id="submit1">Go!</button>
+    <div id="yay3"></div>
+    <span class="loader"><img src="https://ropsten.etherscan.io/images/ajax-loader2.gif"/></span>
   <script type="text/javascript">
     $(document).ready(function() {
+      $(".loader").hide();
       var ethNode = 'http://localhost:8545';
       var adminAccount = '0x03e4ea7c17cc932a9488f84639b774ac376e6e9e';
       var contractAddress = '0x18061eEBc759612E6145B243Be84a44237663c8E';
@@ -55,6 +60,8 @@
                   waitBlock(r.transactionHash, function(ca) {
                     $('#where').html('Contracted created at address: '+ca+'<br/>'
                                       +'Follow all transactions <a target="_blank" href="https://ropsten.etherscan.io/address/'+ca+'">here</a>.');
+                    $('#contractAddress').val(ca);
+                    $('#contractAddress1').val(ca);
                   });
               }
           })
@@ -88,7 +95,9 @@
         var myContractInstance = MyContract.at(contractAddress);
         console.log(myContractInstance);
         console.log(contractAddress);
+        $('#yay2 ~ span.loader').show();
         myContractInstance.whitelistStakeholder(stakeholder, {from: web3.eth.coinbase, gas: 91000}, function(e,r) {
+          $('#yay2 ~ span.loader').hide();
           console.log(e);
           console.log(r);
           if (!e) {
@@ -111,6 +120,8 @@
         // If we use onloadend, we need to check the readyState.
         reader.onloadend = function(evt) {
             var i = IpfsApi("/ip4/127.0.0.1/tcp/5001");
+
+            $('#yay3 ~ span.loader').show();
             i.add(i.Buffer(reader.result), function (err, res){
                 if(err || !res)
                   return console.error("ipfs add error", err, res);
@@ -128,11 +139,13 @@
                 var contractInstance = contract.at(contractAddress);
 
                 contractInstance.amendDocument(1234, fingerprint, {from: web3.eth.coinbase, gas: 1000000}, function(e,r){
+                  $('#yay3 ~ span.loader').hide();
                   if(e){
-                      alert("An error occurred: " + e);
+                      $('#yay3').html('<b>Error</b>: '+e.message);
                   }
                   else {
                       if(r){
+                          $('#yay3').html('The document has been uploaded (fingerprint: '+fingerprint+')');
                           console.log("The document has been uploaded (fingerprint: " + fingerprint + ")");
                       }
                       console.log(r);
