@@ -5,14 +5,18 @@
 - Contract Creator: $C$
 - Stakeholder: $S$
 
+## Walkthrough
+
 1. Create a contract (using $C$)
     - Explain!
 2. Whitelist stakeholder ($S$)
     - What address to whitelist?
 
----- CUT ----
+--- CUT ---
+
 Whitelist contract creator $C$.
----- RESUME ----
+
+--- RESUME ---
 
 3. Upload document (using $C$)
     - Upload some PDF file---just make it look professional.
