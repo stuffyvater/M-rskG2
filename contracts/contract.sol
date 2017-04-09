@@ -1,3 +1,4 @@
+pragma solidity ^0.4.0;
 contract Shipment
 {
 	mapping(address => bool) public whiteList;
@@ -29,12 +30,12 @@ contract Shipment
 	modifier ifAdmin(address user)
 	{
 		if(admin != user) throw;
-		_
+		_;
 	}
 	
 	modifier ifWhitelisted(address stakeholder)
 	{
 		if(whiteList[stakeholder] == false) throw;
-		_
+		_;
 	}	
 }
