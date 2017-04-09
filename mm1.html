@@ -98,6 +98,9 @@
         $('#yay2 ~ span.loader').show();
         myContractInstance.whitelistStakeholder(stakeholder, {from: web3.eth.coinbase, gas: 91000}, function(e,r) {
           $('#yay2 ~ span.loader').hide();
+          if (e) {
+              $('#yay2').html('<b>Error:</b>: '+e.message);
+          }
           console.log(e);
           console.log(r);
           if (!e) {
